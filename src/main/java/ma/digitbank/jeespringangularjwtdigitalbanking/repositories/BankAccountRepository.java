@@ -1,0 +1,12 @@
+package ma.digitbank.jeespringangularjwtdigitalbanking.repositories;
+
+import ma.digitbank.jeespringangularjwtdigitalbanking.entities.BankAccount;
+import ma.digitbank.jeespringangularjwtdigitalbanking.entities.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface BankAccountRepository extends JpaRepository<BankAccount, String> {
+    List<BankAccount> findByCustomer(Customer customer);
+    List<BankAccount> findByCustomerId(Long customerId);
+}
