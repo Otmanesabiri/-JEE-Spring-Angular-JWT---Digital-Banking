@@ -1,0 +1,93 @@
+<div class="container-fluid p-4">
+  <div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h3>Bank Accounts</h3>
+      <div class="d-flex gap-2">
+        <button class="btn btn-light" (click)="openTransferModal()" title="Transfer">
+          <i class="bi bi-arrow-left-right"></i> Transfer
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Search bar -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Search by ID, customer name, or account type..." 
+            [(ngModel)]="searchTerm"
+          >
+        </div>
+      </div>
+
+      <!-- Alert for error message -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+        <button type="button" class="btn-close float-end" (click)="errorMessage = null"></button>
+      </div>
+
+      <!-- Accounts table -->
+      <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Balance</th>
+              <th>Created Date</th>
+              <th>Status</th>
+              <th>Customer</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredAccounts.length === 0">
+              <td colspan="7" class="text-center">No accounts found</td>
+            </tr>
+            <tr *ngFor="let account of filteredAccounts">
+              <td>{{ account.id }}</td>
+              <td>
+                <span [ngClass]="{'text-primary': account.type === 'CurrentAccount', 'text-success': account.type === 'SavingAccount'}">
+                  {{ getAccountTypeLabel(account.type) }}
+                </span>
+              </td>
+              <td class="fw-bold">{{ account.balance | currency }}</td>
+              <td>{{ account.createdAt | date:'medium' }}</td>
+              <td>
+                <span class="badge rounded-pill {{ getStatusClass(account.status) }}">
+                  {{ account.status }}
+                </span>
+              </td>
+              <td>
+                <a [routerLink]="['/customer', account.customerDTO.id]">
+                  {{ account.customerDTO.name }}
+                </a>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a [routerLink]="['/account', account.id]" class="btn btn-info" title="View Details">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a [routerLink]="['/operations', account.id]" class="btn btn-primary" title="Operations">
+                    <i class="bi bi-cash-stack"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+      <div>
+        <span class="badge bg-info me-2">Current Accounts: {{ currentAccountsCount }}</span>
+        <span class="badge bg-success">Saving Accounts: {{ savingAccountsCount }}</span>
+      </div>
+      <div>
+        Total Accounts: {{ accounts.length }}
+      </div>
+    </div>
+  </div>
+</div>

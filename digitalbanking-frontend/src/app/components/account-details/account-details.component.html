@@ -1,0 +1,102 @@
+<div class="container-fluid p-4">
+  <div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h3>Account Details</h3>
+      <div class="d-flex gap-2">
+        <button class="btn btn-light btn-sm" routerLink="/accounts" title="Back to accounts">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <!-- Loading spinner -->
+      <div class="text-center p-5" *ngIf="isLoading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading account details...</p>
+      </div>
+
+      <!-- Error message -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+        <button type="button" class="btn-close float-end" (click)="errorMessage = null"></button>
+      </div>
+
+      <!-- Account details -->
+      <div *ngIf="account && !isLoading">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="account-header d-flex align-items-center mb-4">
+              <div class="account-icon me-3">
+                <i class="bi" [ngClass]="{'bi-wallet2': account.type === 'CurrentAccount', 'bi-piggy-bank': account.type === 'SavingAccount'}"></i>
+              </div>
+              <div>
+                <h4 class="mb-0">{{ getAccountType() }}</h4>
+                <p class="text-muted mb-0">ID: {{ account.id }}</p>
+              </div>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">Account Information</h5>
+                <hr>
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Balance:</strong> <span class="text-success">{{ account.balance | currency }}</span></p>
+                    <p><strong>Status:</strong> 
+                      <span class="badge rounded-pill {{ getStatusClass(account.status) }}">
+                        {{ account.status }}
+                      </span>
+                    </p>
+                    <p><strong>Created Date:</strong> {{ account.createdAt | date:'medium' }}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>{{ getSpecificAccountDetails() }}</strong></p>
+                    <p><strong>Type:</strong> {{ account.type }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">Customer Information</h5>
+                <hr>
+                <div *ngIf="account.customerDTO">
+                  <p><strong>Name:</strong> {{ account.customerDTO.name }}</p>
+                  <p><strong>Email:</strong> {{ account.customerDTO.email }}</p>
+                  <p><strong>ID:</strong> {{ account.customerDTO.id }}</p>
+                  <a [routerLink]="['/customer', account.customerDTO.id]" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-person"></i> View Customer Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Available Operations</h5>
+                <hr>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-success" (click)="openCreditModal()">
+                    <i class="bi bi-plus-circle"></i> Make Deposit
+                  </button>
+                  <button class="btn btn-danger" (click)="openDebitModal()">
+                    <i class="bi bi-dash-circle"></i> Make Withdrawal
+                  </button>
+                  <a [routerLink]="['/operations', account.id]" class="btn btn-primary">
+                    <i class="bi bi-clock-history"></i> View Operations History
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
