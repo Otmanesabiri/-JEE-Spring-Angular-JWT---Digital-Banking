@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Component("jwtUtilsSecondary") // Rename bean to avoid conflict
+@Component
 public class JwtUtils {
 
     // Update to use the application.security.jwt.secret-key property

@@ -17,10 +17,6 @@ export class CustomerService {
     return this.http.get<Customer[]>(this.apiUrl);
   }
 
-  searchCustomers(keyword: string): Observable<Customer[]> {
-    return this.http.get<Customer[]>(`${this.apiUrl}/search?keyword=${keyword}`);
-  }
-
   getCustomer(id: number): Observable<Customer> {
     return this.http.get<Customer>(`${this.apiUrl}/${id}`);
   }
@@ -29,12 +25,12 @@ export class CustomerService {
     return this.http.get<BankAccount[]>(`${this.apiUrl}/${id}/accounts`);
   }
 
-  saveCustomer(customer: Customer): Observable<Customer> {
+  createCustomer(customer: Customer): Observable<Customer> {
     return this.http.post<Customer>(this.apiUrl, customer);
   }
 
-  updateCustomer(customer: Customer): Observable<Customer> {
-    return this.http.put<Customer>(`${this.apiUrl}/${customer.id}`, customer);
+  updateCustomer(id: number, customer: Customer): Observable<Customer> {
+    return this.http.put<Customer>(`${this.apiUrl}/${id}`, customer);
   }
 
   deleteCustomer(id: number): Observable<void> {

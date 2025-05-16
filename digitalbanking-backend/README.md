@@ -153,3 +153,159 @@ This application supports an H2 in-memory database, which is useful for developm
    ```bash
    mvn spring-boot:run -Dspring-boot.run.profiles=mysql
    ```
+
+## Connecting Frontend with Backend
+
+### Backend Configuration
+
+1. **Enable CORS in Spring Boot**:
+   Create a CORS configuration class in the backend:
+
+   ```java
+   // in package ma.digitbank.jeespringangularjwtdigitalbanking.config
+   @Configuration
+   public class CorsConfig implements WebMvcConfigurer {
+       @Override
+       public void addCorsMappings(CorsRegistry registry) {
+           registry.addMapping("/**")
+               .allowedOrigins("http://localhost:4200")
+               .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+               .allowedHeaders("*")
+               .allowCredentials(true)
+               .maxAge(3600);
+       }
+   }
+   ```
+
+2. **Configure Security to Allow CORS**:
+   Update the SecurityConfig class to permit CORS pre-flight requests:
+
+   ```java
+   @Bean
+   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+       http
+           .cors(Customizer.withDefaults()) // Enable CORS
+           .csrf(AbstractHttpConfigurer::disable)
+           // ...rest of your security configuration
+   }
+   ```
+
+### Frontend Configuration
+
+1. **Environment Configuration**:
+   Create or update environment files to store API URL:
+
+   ```typescript
+   // src/environments/environment.ts
+   export const environment = {
+     production: false,
+     apiUrl: 'http://localhost:8080/api'
+   };
+   ```
+
+2. **HTTP Interceptor for Authentication**:
+   Create a JWT interceptor to add the token to all requests:
+
+   ```typescript
+   // src/app/interceptors/auth.interceptor.ts
+   import { Injectable } from '@angular/core';
+   import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+   import { Observable } from 'rxjs';
+   import { AuthService } from '../services/auth.service';
+
+   @Injectable()
+   export class AuthInterceptor implements HttpInterceptor {
+     constructor(private authService: AuthService) {}
+
+     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+       const token = this.authService.getToken();
+
+       if (token) {
+         const cloned = req.clone({
+           headers: req.headers.set('Authorization', `Bearer ${token}`)
+         });
+         return next.handle(cloned);
+       }
+       return next.handle(req);
+     }
+   }
+   ```
+
+3. **Register the Interceptor**:
+   Update your app.config.ts:
+
+   ```typescript
+   // src/app/app.config.ts
+   import { provideHttpClient, withInterceptors } from '@angular/common/http';
+   import { authInterceptor } from './interceptors/auth.interceptor';
+
+   export const appConfig: ApplicationConfig = {
+     providers: [
+       // ...other providers
+       provideHttpClient(withInterceptors([authInterceptor])),
+     ]
+   };
+   ```
+
+4. **Update API Services**:
+   Ensure all API service classes use the environment configuration:
+
+   ```typescript
+   // src/app/services/customer.service.ts
+   import { Injectable } from '@angular/core';
+   import { HttpClient } from '@angular/common/http';
+   import { Observable } from 'rxjs';
+   import { environment } from '../../environments/environment';
+   import { Customer } from '../models/customer.model';
+
+   @Injectable({
+     providedIn: 'root'
+   })
+   export class CustomerService {
+     private apiUrl = `${environment.apiUrl}/customers`;
+
+     constructor(private http: HttpClient) {}
+
+     getCustomers(): Observable<Customer[]> {
+       return this.http.get<Customer[]>(this.apiUrl);
+     }
+
+     // ...other methods
+   }
+   ```
+
+### Testing the Connection
+
+1. **Start the Backend**:
+   ```bash
+   cd /home/red/Documents/GitHub/-JEE-Spring-Angular-JWT---Digital-Banking/digitalbanking-backend
+   mvn spring-boot:run
+   ```
+
+2. **Start the Frontend**:
+   ```bash
+   cd /home/red/Documents/GitHub/-JEE-Spring-Angular-JWT---Digital-Banking/digitalbanking-frontend
+   ng serve
+   ```
+
+3. **Verify API Access**:
+   - Open the browser console to check for CORS or connection errors
+   - Test the API endpoints through the UI
+   - Verify authentication flow works correctly
+
+### Troubleshooting Connection Issues
+
+- **CORS Errors**:
+  - Ensure the CORS configuration allows your frontend origin
+  - Check for typos in the allowed origin URL
+  - Verify all needed HTTP methods are allowed
+
+- **Authentication Issues**:
+  - Confirm the JWT token is properly stored after login
+  - Verify the token is correctly included in request headers
+  - Check token expiration and refresh logic
+
+- **Network Errors**:
+  - Verify both applications are running on the expected ports
+  - Check for any proxy settings that might interfere
+  - Ensure your firewall allows the connections

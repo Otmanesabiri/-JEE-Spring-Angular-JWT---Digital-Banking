@@ -1,30 +1,14 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { authInterceptor } from './interceptors/auth.interceptor';
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter, withHashLocation } from '@angular/router';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { JwtModule } from '@auth0/angular-jwt';
 
-export function tokenGetter() {
-  return localStorage.getItem('token');
-}
+import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(
-      withInterceptors([authInterceptor])
-    ),
-    provideAnimations(),
-    importProvidersFrom(
-      JwtModule.forRoot({
-        config: {
-          tokenGetter: tokenGetter,
-          allowedDomains: ["localhost:8085"],
-          disallowedRoutes: ["localhost:8085/api/auth/login"]
-        }
-      })
-    )
+    provideRouter(routes, withHashLocation()), // Using hash location strategy to avoid refresh issues
+    provideHttpClient(withFetch()),
+    provideAnimations()
   ]
 };

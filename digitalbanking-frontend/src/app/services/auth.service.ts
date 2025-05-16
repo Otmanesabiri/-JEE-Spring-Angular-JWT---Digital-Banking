@@ -1,79 +1,104 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
-import { JwtResponse, LoginRequest, RegisterRequest, User, ChangePasswordRequest } from '../models/user.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { JwtHelperService } from '@auth0/angular-jwt';
+import { StorageService } from './storage.service';
+
+interface AuthResponse {
+  token: string;
+  refreshToken?: string;
+  expiresIn?: number;
+  username: string;
+  roles: string[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
-  private jwtHelper = new JwtHelperService();
+  private tokenKey = 'jwt_token';
+  private refreshTokenKey = 'refresh_token';
+  private currentUserSubject = new BehaviorSubject<any>(null);
   
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  user$ = this.currentUserSubject.asObservable();
-  
-  isAuthenticated$ = this.user$.pipe(
+  public currentUser$ = this.currentUserSubject.asObservable();
+  public isAuthenticated$ = this.currentUser$.pipe(
     map(user => !!user)
   );
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private storageService: StorageService
+  ) {
     this.loadStoredUser();
   }
 
-  login(loginRequest: LoginRequest): Observable<JwtResponse> {
-    return this.http.post<JwtResponse>(`${this.apiUrl}/login`, loginRequest).pipe(
-      tap(response => {
-        this.storeToken(response.token);
-        this.storeUser({
-          username: response.username,
-          roles: response.roles
-        });
-      })
-    );
+  login(username: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { username, password })
+      .pipe(
+        tap(response => this.setSession(response))
+      );
   }
 
-  register(registerRequest: RegisterRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signup`, registerRequest);
-  }
-
-  changePassword(changePasswordRequest: ChangePasswordRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/changePassword`, changePasswordRequest);
+  register(username: string, email: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, {
+      username,
+      email,
+      password
+    });
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    this.storageService.removeItem(this.tokenKey);
+    this.storageService.removeItem(this.refreshTokenKey);
     this.currentUserSubject.next(null);
   }
 
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return of({ token: '', username: '', roles: [] } as AuthResponse);
+    }
+    
+    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh-token`, { refreshToken })
+      .pipe(
+        tap(response => this.setSession(response))
+      );
+  }
+
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return this.storageService.getItem(this.tokenKey);
   }
 
-  private storeToken(token: string): void {
-    localStorage.setItem('token', token);
+  private getRefreshToken(): string | null {
+    return this.storageService.getItem(this.refreshTokenKey);
   }
 
-  private storeUser(user: User): void {
-    localStorage.setItem('user', JSON.stringify(user));
-    this.currentUserSubject.next(user);
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  private setSession(authResult: AuthResponse): void {
+    this.storageService.setItem(this.tokenKey, authResult.token);
+    if (authResult.refreshToken) {
+      this.storageService.setItem(this.refreshTokenKey, authResult.refreshToken);
+    }
+    
+    this.currentUserSubject.next({
+      username: authResult.username,
+      roles: authResult.roles
+    });
   }
 
   private loadStoredUser(): void {
     const token = this.getToken();
-    if (token && !this.jwtHelper.isTokenExpired(token)) {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      this.currentUserSubject.next(user);
-    } else {
-      this.logout();
+    if (token) {
+      // For now we're just setting a basic user object when token exists
+      this.currentUserSubject.next({
+        username: 'Stored User',
+        roles: []
+      });
     }
-  }
-
-  isAdmin(): boolean {
-    const user = this.currentUserSubject.value;
-    return user?.roles?.includes('ADMIN') || false;
   }
 }

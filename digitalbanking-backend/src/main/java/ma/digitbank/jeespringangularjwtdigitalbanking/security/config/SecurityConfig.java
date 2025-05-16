@@ -23,6 +23,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(Customizer.withDefaults())  // Enable CORS with default settings
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> 
                 req.requestMatchers(
@@ -31,8 +32,8 @@ public class SecurityConfig {
                        "/swagger-ui/**", 
                        "/swagger-ui.html",
                        "/v3/api-docs/**",
-                       "/api/customers/**", // Temporarily allowing access for testing
-                       "/api/accounts/**"   // Temporarily allowing access for testing
+                       "/api/customers/**",  // Allow customer endpoints for now
+                       "/api/accounts/**"    // Allow account endpoints for now
                    )
                    .permitAll()
                    .anyRequest()
