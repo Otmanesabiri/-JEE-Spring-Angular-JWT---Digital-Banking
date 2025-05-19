@@ -1,215 +1,127 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NgChartsModule } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartEvent, ChartType } from 'chart.js';
 import { AccountService } from '../../services/account.service';
 import { CustomerService } from '../../services/customer.service';
-import { DashboardService } from '../../services/dashboard.service';
-import { AuthService } from '../../services/auth.service';
-import { BankAccount } from '../../models/account.model';
-import { Customer } from '../../models/customer.model';
-import { Chart, registerables } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
-
-Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgChartsModule],
+  imports: [CommonModule, NgChartsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  accounts: BankAccount[] = [];
-  customers: Customer[] = [];
-  stats: any = {};
-  userStats: any = {};
-  isLoading = true;
-  isAdmin = false;
-  errorMessage: string | null = null;
+
+  // Bar Chart: Account Types
+  public accountTypesChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    scales: {
+      x: {},
+      y: {
+        beginAtZero: true
+      }
+    },
+    plugins: {
+      legend: {
+        display: true,
+      }
+    }
+  };
+  public accountTypesChartLabels: string[] = ['Current Accounts', 'Saving Accounts'];
+  public accountTypesChartType: ChartType = 'bar';
+  public accountTypesChartLegend = true;
+  public accountTypesChartData: ChartData<'bar'> = {
+    labels: this.accountTypesChartLabels,
+    datasets: [
+      { data: [0, 0], label: 'Number of Accounts', backgroundColor: ['#36A2EB', '#FFCE56'] }
+    ]
+  };
+
+  // Pie Chart: Account Statuses
+  public accountStatusesChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      }
+    }
+  };
+  public accountStatusesChartType: ChartType = 'pie';
+  public accountStatusesChartLegend = true;
+  public accountStatusesChartData: ChartData<'pie', number[], string | string[]> = {
+    labels: ['Created', 'Activated', 'Suspended', 'Blocked'],
+    datasets: [{
+      data: [0, 0, 0, 0],
+      backgroundColor: ['#4BC0C0', '#36A2EB', '#FFCE56', '#FF6384'],
+    }]
+  };
+
+  totalCustomers: number = 0;
+  totalAccounts: number = 0;
+  totalBalance: number = 0;
 
   constructor(
     private accountService: AccountService,
-    private customerService: CustomerService,
-    private dashboardService: DashboardService,
-    private authService: AuthService
+    private customerService: CustomerService
   ) {}
 
   ngOnInit(): void {
-    this.loadAccounts();
-    this.loadCustomers();
-
-    this.isAdmin = this.authService.isAdmin();
-    
-    if (this.isAdmin) {
-      this.loadAdminDashboard();
-    } else {
-      this.loadUserDashboard();
-    }
-  }
-  
-  loadAccounts(): void {
-    this.accountService.getAccounts().subscribe({
-      next: (data) => {
-        this.accounts = data;
-      },
-      error: (err) => console.error('Error loading accounts', err)
-    });
-  }
-  
-  loadCustomers(): void {
-    this.customerService.getCustomers().subscribe({
-      next: (data) => {
-        this.customers = data;
-      },
-      error: (err) => console.error('Error loading customers', err)
-    });
-  }
-  
-  loadAdminDashboard(): void {
-    this.dashboardService.getStats().subscribe({
-      next: (data) => {
-        this.stats = data;
-        this.isLoading = false;
-        
-        // Load chart data after stats
-        this.loadAccountTypeChart();
-      },
-      error: (err) => {
-        this.errorMessage = 'Error loading dashboard statistics';
-        this.isLoading = false;
-        console.error(err);
-      }
-    });
+    this.loadDashboardData();
   }
 
-  loadUserDashboard(): void {
-    this.dashboardService.getUserStatistics().subscribe({
-      next: (data) => {
-        this.userStats = data;
-        this.isLoading = false;
-        
-        // Load user specific charts
-        this.loadUserOperationChart();
-      },
-      error: (err) => {
-        this.errorMessage = 'Error loading user statistics';
-        this.isLoading = false;
-        console.error(err);
-      }
-    });
-  }
+  loadDashboardData(): void {
+    // Example: Fetch account data to populate charts
+    this.accountService.getAccounts().subscribe(accounts => {
+      this.totalAccounts = accounts.length;
+      let currentAccounts = 0;
+      let savingAccounts = 0;
+      let created = 0;
+      let activated = 0;
+      let suspended = 0;
+      let blocked = 0;
+      
+      this.totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
-  loadOperationCharts(): void {
-    this.dashboardService.getMonthlyOperationStats().subscribe({
-      next: (data) => {
-        const months = data.map((item: any) => item.month);
-        const creditOps = data.map((item: any) => item.creditOperations);
-        const debitOps = data.map((item: any) => item.debitOperations);
-        
-        const ctx = document.getElementById('operationsChart') as HTMLCanvasElement;
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: months,
-            datasets: [
-              {
-                label: 'Credit Operations',
-                data: creditOps,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                tension: 0.1
-              },
-              {
-                label: 'Debit Operations',
-                data: debitOps,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 2,
-                tension: 0.1
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
-      }
-    });
-  }
-
-  loadAccountTypeChart(): void {
-    const ctx = document.getElementById('accountTypesChart') as HTMLCanvasElement;
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Current Accounts', 'Saving Accounts'],
-        datasets: [{
-          data: [this.stats.currentAccounts, this.stats.savingAccounts],
-          backgroundColor: [
-            'rgba(54, 162, 235, 0.8)',
-            'rgba(255, 206, 86, 0.8)'
-          ],
-          borderColor: [
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true
-      }
-    });
-  }
-
-  loadUserOperationChart(): void {
-    if (!this.userStats.operationsByType) return;
-    
-    const operationTypes = Object.keys(this.userStats.operationsByType);
-    const operationCounts = Object.values(this.userStats.operationsByType);
-    
-    const ctx = document.getElementById('userOperationsChart') as HTMLCanvasElement;
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: operationTypes,
-        datasets: [{
-          label: 'Operations Performed',
-          data: operationCounts,
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.8)',
-            'rgba(255, 99, 132, 0.8)'
-          ],
-          borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(255, 99, 132, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
+      accounts.forEach(account => {
+        if (account.type === 'CurrentAccount') {
+          currentAccounts++;
+        } else if (account.type === 'SavingAccount') {
+          savingAccounts++;
         }
-      }
+
+        switch (account.status) {
+          case 'CREATED': created++; break;
+          case 'ACTIVATED': activated++; break;
+          case 'SUSPENDED': suspended++; break;
+          case 'BLOCKED': blocked++; break;
+        }
+      });
+
+      this.accountTypesChartData.datasets[0].data = [currentAccounts, savingAccounts];
+      this.accountStatusesChartData.datasets[0].data = [created, activated, suspended, blocked];
+      
+      // Trigger chart update if ng2-charts doesn't do it automatically
+      // This is often not needed as ng2-charts handles data changes.
+      // If charts don't update, you might need to re-assign the chart data object
+      // or use the Chart.js API if you have a @ViewChild reference to the chart.
+      this.accountTypesChartData = { ...this.accountTypesChartData };
+      this.accountStatusesChartData = { ...this.accountStatusesChartData };
+    });
+
+    this.customerService.getCustomers().subscribe(customers => {
+      this.totalCustomers = customers.length;
     });
   }
-  
-  get currentAccountsCount(): number {
-    return this.accounts.filter(a => a.type === 'CurrentAccount').length;
+
+  // Optional chart event handlers
+  public chartClicked({ event, active }: { event?: ChartEvent, active?: {}[] }): void {
+    console.log(event, active);
   }
-  
-  get savingAccountsCount(): number {
-    return this.accounts.filter(a => a.type === 'SavingAccount').length;
+
+  public chartHovered({ event, active }: { event?: ChartEvent, active?: {}[] }): void {
+    console.log(event, active);
   }
 }

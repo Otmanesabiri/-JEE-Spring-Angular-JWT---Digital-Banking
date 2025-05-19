@@ -1,61 +1,77 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
+import { CustomersComponent } from './components/customers/customers.component';
+import { AccountsComponent } from './components/accounts/accounts.component';
+import { AccountDetailsComponent } from './components/account-details/account-details.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { CustomerFormComponent } from './components/customer-form/customer-form.component';
+import { CustomerDetailsComponent } from './components/customer-details/customer-details.component';
+import { AccountFormComponent } from './components/account-form/account-form.component';
+import { OperationsComponent } from './components/operations/operations.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component'; // Import DashboardComponent
 
 export const routes: Routes = [
-  { 
-    path: 'login', 
-    loadComponent: () => import('./components/login/login.component').then(c => c.LoginComponent)
-  },
-  { 
-    path: 'register', 
-    loadComponent: () => import('./components/register/register.component').then(c => c.RegisterComponent)
-  },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
   { 
     path: 'dashboard', 
-    loadComponent: () => import('./components/dashboard/dashboard.component').then(c => c.DashboardComponent),
-    canActivate: [authGuard]
+    component: DashboardComponent, // Add dashboard route
+    canActivate: [authGuard] 
   },
   { 
     path: 'customers', 
-    loadComponent: () => import('./components/customers/customers.component').then(c => c.CustomersComponent),
-    canActivate: [authGuard, adminGuard]
+    component: CustomersComponent, 
+    canActivate: [authGuard, adminGuard] 
+  },
+  { 
+    path: 'customers/new', 
+    component: CustomerFormComponent, 
+    canActivate: [authGuard, adminGuard] 
+  },
+  { 
+    path: 'customers/:id/edit', 
+    component: CustomerFormComponent, 
+    canActivate: [authGuard, adminGuard] 
   },
   { 
     path: 'customers/:id', 
-    loadComponent: () => import('./components/customer-details/customer-details.component').then(c => c.CustomerDetailsComponent),
-    canActivate: [authGuard, adminGuard]
+    component: CustomerDetailsComponent, 
+    canActivate: [authGuard, adminGuard] 
   },
   { 
     path: 'accounts', 
-    loadComponent: () => import('./components/accounts/accounts.component').then(c => c.AccountsComponent),
-    canActivate: [authGuard]
+    component: AccountsComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'accounts/new/:type', // :type can be 'current' or 'saving'
+    component: AccountFormComponent, 
+    canActivate: [authGuard, adminGuard] 
   },
   { 
     path: 'accounts/:id', 
-    loadComponent: () => import('./components/account-details/account-details.component').then(c => c.AccountDetailsComponent),
-    canActivate: [authGuard]
-  },
-  { 
-    path: 'accounts/new/:type', 
-    loadComponent: () => import('./components/account-form/account-form.component').then(c => c.AccountFormComponent),
-    canActivate: [authGuard, adminGuard]
-  },
-  { 
-    path: 'profile', 
-    loadComponent: () => import('./components/profile/profile.component').then(c => c.ProfileComponent),
-    canActivate: [authGuard]
-  },
-  { 
-    path: 'change-password', 
-    loadComponent: () => import('./components/change-password/change-password.component').then(c => c.ChangePasswordComponent),
-    canActivate: [authGuard]
+    component: AccountDetailsComponent, 
+    canActivate: [authGuard] 
   },
   { 
     path: 'operations', 
-    loadComponent: () => import('./components/operations/operations.component').then(c => c.OperationsComponent),
-    canActivate: [authGuard]
+    component: OperationsComponent, 
+    canActivate: [authGuard] 
   },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: '**', redirectTo: '/dashboard' }
+  { 
+    path: 'change-password', 
+    component: ChangePasswordComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'profile', 
+    component: ProfileComponent, 
+    canActivate: [authGuard] 
+  },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' } // Fallback route
 ];

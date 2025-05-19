@@ -13,13 +13,20 @@
 
 .chart-container {
   position: relative;
-  height: 300px;
-  width: 100%;
+  height: 250px; 
+  width: 80%;
+}
+
+.chart {
+  display: block;
+  width: 100% !important;
+  height: 350px !important; 
 }
 
 .text-truncate-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
