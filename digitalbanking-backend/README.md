@@ -154,6 +154,108 @@ This application supports an H2 in-memory database, which is useful for developm
    mvn spring-boot:run -Dspring-boot.run.profiles=mysql
    ```
 
+## Backend Phase Report
+
+This section provides a summary of the backend development phase for the Digital Banking application.
+
+### 1. Overview
+
+The backend is a RESTful API service built using Java and the Spring Boot framework. It handles all business logic, data persistence, and security for the application. Key functionalities include customer management, bank account operations, transaction processing, and user authentication/authorization.
+
+### 2. Technologies Used
+
+*   **Java 17**: Core programming language.
+*   **Spring Boot 3.x**: Framework for building robust and scalable applications.
+    *   **Spring MVC**: For creating RESTful web services.
+    *   **Spring Data JPA**: For data persistence and interaction with the database.
+    *   **Spring Security**: For handling authentication and authorization.
+*   **JSON Web Tokens (JWT)**: For securing API endpoints and managing user sessions.
+*   **Hibernate**: JPA implementation for ORM.
+*   **Maven**: Build automation and dependency management.
+*   **Database**:
+    *   **H2 Database**: In-memory database for development and testing.
+    *   **MySQL**: Relational database for production-like environments.
+*   **Lombok**: To reduce boilerplate code (e.g., getters, setters, constructors).
+*   **Swagger/OpenAPI 3**: For API documentation and testing (accessible via `/swagger-ui.html`).
+
+### 3. Core Functionalities Implemented
+
+*   **Authentication & Authorization**:
+    *   User registration (`/api/auth/signup`).
+    *   User login with JWT generation (`/api/auth/login`).
+    *   Password change functionality (`/api/auth/changePassword`).
+    *   Role-based access control (RBAC) with "ADMIN" and "USER" roles.
+    *   Secure API endpoints using Spring Security and JWT.
+    *   User profile retrieval (`/api/auth/profile`).
+*   **Customer Management (Admin)**:
+    *   CRUD operations for customers (Create, Read, Update, Delete).
+    *   Search functionality for customers.
+    *   Endpoints: `/api/customers`.
+*   **Bank Account Management**:
+    *   Creation of Current and Saving accounts.
+    *   Retrieval of account details and lists of accounts.
+    *   Retrieval of accounts associated with a specific customer.
+    *   Endpoints: `/api/accounts`.
+*   **Account Operations**:
+    *   Debit and Credit operations on bank accounts.
+    *   Transfer of funds between accounts.
+    *   Retrieval of account operation history with pagination.
+    *   Endpoints: `/api/accounts/{accountId}/operations`, `/api/accounts/debit`, `/api/accounts/credit`, `/api/accounts/transfer`.
+*   **User Management (Admin)**:
+    *   Listing users.
+    *   Assigning/removing roles to/from users.
+    *   Endpoints: `/api/admin/users`, `/api/admin/roles`.
+
+### 4. Architecture and Design
+
+*   **Layered Architecture**:
+    *   **Controller Layer**: Handles HTTP requests and responses (REST APIs).
+    *   **Service Layer**: Contains business logic.
+    *   **Repository Layer**: Interacts with the database using Spring Data JPA.
+    *   **Entity Layer**: Defines data models (JPA entities).
+    *   **DTO (Data Transfer Object) Layer**: Used for transferring data between layers, especially for API responses and requests.
+    *   **Mapper Layer**: Converts between DTOs and Entities.
+*   **Security**:
+    *   `JwtAuthenticationFilter` for validating JWT tokens on each request.
+    *   `UserDetailsService` implementation for loading user-specific data.
+    *   `PasswordEncoder` (BCrypt) for securely storing passwords.
+    *   Custom `AuthenticationEntryPoint` for handling unauthorized access.
+*   **Error Handling**:
+    *   Custom exceptions (e.g., `CustomerNotFoundException`, `BankAccountNotFoundException`, `BalanceNotSufficientException`).
+    *   Global exception handling (though not explicitly shown in provided files, typically implemented with `@ControllerAdvice`).
+*   **Auditing**:
+    *   Basic auditing fields (`createdBy`, `lastModifiedBy`) are present in some entities, populated with the username of the authenticated user performing the action.
+
+### 5. Database Schema
+
+*   **`Customer`**: Stores customer information.
+*   **`BankAccount`**: Abstract base class for bank accounts, using single-table inheritance (`CurrentAccount`, `SavingAccount`).
+*   **`AccountOperation`**: Records all transactions (debit, credit).
+*   **`AppUser`**: Stores user credentials and roles for application access.
+*   **`AppRole`**: Defines user roles (e.g., ADMIN, USER).
+
+### 6. Configuration
+
+*   **`application.properties`**: Centralized configuration for server port, database connection (H2/MySQL), JWT secrets, and logging levels.
+*   **CORS Configuration**: Enabled to allow requests from the frontend application (typically `http://localhost:4200`).
+*   **Initial Data Seeding**: `CommandLineRunner` in the main application class to create default roles (ADMIN, USER) and users (admin, user) on startup.
+
+### 7. Challenges and Solutions (Illustrative)
+
+*   **JWT Signature Mismatch**: Ensured that the secret key used for signing and validating JWTs was identical and processed consistently (e.g., UTF-8 bytes vs. Base64 decoding). This was resolved by standardizing the key derivation in `JwtUtils.java` and `JWTService.java` and ensuring correct configuration in `application.properties`.
+*   **Property File Parsing**: Corrected formatting of numeric properties with comments in `application.properties` to prevent `NumberFormatException`.
+*   **Lazy Initialization Issues**: Addressed potential `LazyInitializationException` by using DTOs and ensuring necessary data is fetched within transactional service methods or by configuring appropriate fetch types. (The use of `@Lazy` on `UserDetailsService` in `JwtAuthenticationFilter` and `ApplicationConfig` is a common pattern to break circular dependencies).
+
+### 8. Future Enhancements (Potential)
+
+*   More granular permissions.
+*   Two-factor authentication.
+*   Advanced reporting and analytics.
+*   Integration with external services (e.g., email notifications).
+*   More comprehensive auditing.
+
+This report summarizes the state and structure of the backend system as developed.
+
 ## Connecting Frontend with Backend
 
 ### Backend Configuration
