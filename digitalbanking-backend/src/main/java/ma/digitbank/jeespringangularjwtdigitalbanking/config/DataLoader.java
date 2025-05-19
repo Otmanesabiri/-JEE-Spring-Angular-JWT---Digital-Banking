@@ -28,7 +28,7 @@ public class DataLoader {
             System.out.println("Seeding database with sample data...");
             
             // Create customers
-            Stream.of("John Doe", "Jane Smith", "Michael Johnson", "Sarah Williams", "Robert Brown")
+            Stream.of("mohamed ali", "adil makhlof", "karima tawni", "Sara vilad", "ismail Bahi")
                 .map(name -> {
                     CustomerDTO customer = new CustomerDTO();
                     customer.setName(name);
@@ -50,8 +50,7 @@ public class DataLoader {
                         bankAccountService.saveCurrentBankAccount(
                                 currentAccount.getBalance(), 
                                 currentAccount.getOverDraft(), 
-                                savedCustomer.getId(), 
-                                "USD");
+                                savedCustomer.getId());
 
                         // Create saving account for some customers
                         if (Math.random() > 0.3) { // 70% chance of having a saving account
@@ -64,8 +63,7 @@ public class DataLoader {
                             bankAccountService.saveSavingBankAccount(
                                     savingAccount.getBalance(),
                                     savingAccount.getInterestRate(),
-                                    savedCustomer.getId(),
-                                    "USD");
+                                    savedCustomer.getId());
                         }
                     } catch (Exception e) {
                         System.err.println("Error seeding customer: " + e.getMessage());

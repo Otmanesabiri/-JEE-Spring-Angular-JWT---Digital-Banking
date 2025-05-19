@@ -5,18 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { AccountService } from '../../services/account.service';
 import { BankAccount } from '../../models/account.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-// Update the import path below if the file exists elsewhere, for example:
-// TODO: Update the path below if your TransferOperationComponent exists elsewhere
 import { TransferOperationComponent } from '../operations/transfer-operation/transfer-operation.component';
-// If the file does not exist, create it or correct the path as needed.
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './accounts.component.html',
-  styleUrl: './accounts.component.css'
+  styleUrls: ['./accounts.component.css']
 })
 export class AccountsComponent implements OnInit {
   accounts: BankAccount[] = [];
@@ -44,10 +40,6 @@ export class AccountsComponent implements OnInit {
     });
   }
 
-  getAccountTypeLabel(type: string): string {
-    return type === 'CurrentAccount' ? 'Current Account' : 'Saving Account';
-  }
-
   getStatusClass(status: string): string {
     switch (status) {
       case 'CREATED': return 'bg-info';
@@ -66,6 +58,10 @@ export class AccountsComponent implements OnInit {
         this.loadAccounts();
       }
     }, () => {});
+  }
+
+  get totalBalance(): number {
+    return this.accounts.reduce((sum, account) => sum + account.balance, 0);
   }
 
   get filteredAccounts(): BankAccount[] {

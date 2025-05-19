@@ -123,13 +123,15 @@ export class CustomersComponent implements OnInit {
     console.log('Edit customer:', customer);
   }
   
-  deleteCustomer(id: number): void {
+  deleteCustomer(id: number | undefined): void {
+    if (!id) return;
+    
     if (confirm('Are you sure you want to delete this customer?')) {
       this.customerService.deleteCustomer(id).subscribe({
         next: () => {
           this.loadCustomers();
         },
-        error: (err) => {
+        error: (err: any) => {
           this.errorMessage = 'Error deleting customer';
           console.error(err);
         }
@@ -146,7 +148,7 @@ export class CustomersComponent implements OnInit {
     return this.customers.filter(customer => 
       customer.name.toLowerCase().includes(term) || 
       customer.email.toLowerCase().includes(term) || 
-      customer.phone.toLowerCase().includes(term)
+      (customer.phone ? customer.phone.toLowerCase().includes(term) : false)
     );
   }
 }

@@ -20,7 +20,7 @@ public class JeeSpringAngularJwtDigitalBankingApplication {
                 securityService.saveNewRole("ADMIN");
                 securityService.saveNewRole("USER");
 
-                securityService.saveNewUser("admin", "1234", "1234");
+                securityService.saveNewUser("admin", "admin", "admin");
                 securityService.saveNewUser("user", "1234", "1234");
 
                 securityService.addRoleToUser("admin", "ADMIN");

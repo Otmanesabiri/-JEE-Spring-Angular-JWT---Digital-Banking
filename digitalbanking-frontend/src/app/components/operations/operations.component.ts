@@ -1,89 +1,139 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountService } from '../../services/account.service';
 import { BankAccount } from '../../models/account.model';
-import { AccountHistory, AccountOperation, OperationType } from '../../models/operation.model';
-import { FormsModule } from '@angular/forms';
+import { NgbNav, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-operations',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, NgbNavModule],
   templateUrl: './operations.component.html',
-  styleUrl: './operations.component.css'
+  styleUrls: ['./operations.component.css']
 })
 export class OperationsComponent implements OnInit {
-  accountId: string = '';
-  account: BankAccount | null = null;
-  accountHistory: AccountHistory | null = null;
+  accounts: BankAccount[] = [];
+  operationForm: FormGroup;
+  transferForm: FormGroup;
+  activeTab = 1;
+  isLoading = false;
   errorMessage: string | null = null;
-  isLoading: boolean = true;
-  currentPage: number = 0;
-  pageSize: number = 5;
-  totalPages: number = 0;
-  
+  successMessage: string | null = null;
+
   constructor(
-    private route: ActivatedRoute,
-    private accountService: AccountService
-  ) {}
-  
+    private accountService: AccountService, 
+    private formBuilder: FormBuilder
+  ) {
+    this.operationForm = this.formBuilder.group({
+      accountId: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.min(0.01)]],
+      description: ['', Validators.required],
+      operationType: ['CREDIT', Validators.required]
+    });
+
+    this.transferForm = this.formBuilder.group({
+      sourceAccountId: ['', Validators.required],
+      destinationAccountId: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.min(0.01)]],
+      description: ['Transfer operation', Validators.required]
+    });
+  }
+
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.accountId = params['accountId'];
-      this.loadAccountDetails();
-      this.loadOperations();
-    });
+    this.loadAccounts();
   }
-  
-  loadAccountDetails(): void {
-    this.accountService.getAccount(this.accountId).subscribe({
-      next: (data) => {
-        this.account = data;
+
+  loadAccounts(): void {
+    this.accountService.getAccounts().subscribe({
+      next: (accounts) => {
+        this.accounts = accounts;
       },
       error: (err) => {
-        this.errorMessage = 'Error loading account details';
-        console.error(err);
+        console.error('Error loading accounts', err);
       }
     });
   }
-  
-  loadOperations(): void {
+
+  onOperationSubmit(): void {
+    if (this.operationForm.invalid) {
+      return;
+    }
+
     this.isLoading = true;
-    this.accountService.getAccountHistory(this.accountId, this.currentPage, this.pageSize).subscribe({
-      next: (data) => {
-        this.accountHistory = data;
-        this.totalPages = data.totalPages;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.errorMessage = 'Error loading operations history';
-        console.error(err);
-        this.isLoading = false;
-      }
-    });
-  }
-  
-  gotoPage(page: number): void {
-    if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      this.loadOperations();
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    const { accountId, amount, description, operationType } = this.operationForm.value;
+
+    if (operationType === 'CREDIT') {
+      this.accountService.credit(accountId, amount, description).subscribe({
+        next: () => {
+          this.handleOperationSuccess('Credit operation completed successfully');
+        },
+        error: (err) => {
+          this.handleOperationError(err);
+        }
+      });
+    } else {
+      this.accountService.debit(accountId, amount, description).subscribe({
+        next: () => {
+          this.handleOperationSuccess('Debit operation completed successfully');
+        },
+        error: (err) => {
+          this.handleOperationError(err);
+        }
+      });
     }
   }
-  
-  getOperationTypeClass(type: OperationType): string {
-    return type === OperationType.CREDIT ? 'text-success' : 'text-danger';
+
+  onTransferSubmit(): void {
+    if (this.transferForm.invalid) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    const { sourceAccountId, destinationAccountId, amount } = this.transferForm.value;
+
+    if (sourceAccountId === destinationAccountId) {
+      this.errorMessage = 'Source and destination accounts cannot be the same';
+      this.isLoading = false;
+      return;
+    }
+
+    this.accountService.transfer(sourceAccountId, destinationAccountId, amount).subscribe({
+      next: () => {
+        this.handleOperationSuccess('Transfer operation completed successfully');
+      },
+      error: (err) => {
+        this.handleOperationError(err);
+      }
+    });
   }
-  
-  getOperationTypeIcon(type: OperationType): string {
-    return type === OperationType.CREDIT ? 'bi-plus-circle' : 'bi-dash-circle';
+
+  private handleOperationSuccess(message: string): void {
+    this.isLoading = false;
+    this.successMessage = message;
+    this.operationForm.reset({
+      operationType: 'CREDIT'
+    });
+    this.transferForm.reset({
+      description: 'Transfer operation'
+    });
+    this.loadAccounts();
   }
-  
-  getOperationTypeText(type: OperationType): string {
-    return type === OperationType.CREDIT ? 'Deposit' : 'Withdrawal';
+
+  private handleOperationError(err: any): void {
+    this.isLoading = false;
+    this.errorMessage = err.error?.error || 'An error occurred during the operation';
+    console.error('Operation error', err);
   }
-  
-  get pagesArray(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i);
+
+  getAccountLabel(account: BankAccount): string {
+    const accountType = account.type === 'CurrentAccount' ? 'Current' : 'Saving';
+    return `${account.customerDTO.name} - ${accountType} (${account.id})`;
   }
 }

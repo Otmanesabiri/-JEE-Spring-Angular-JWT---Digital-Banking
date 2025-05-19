@@ -12,7 +12,6 @@ ma/digitbank/jeespringangularjwtdigitalbanking/security/web/AuthController.class
 ma/digitbank/jeespringangularjwtdigitalbanking/security/web/UserManagementController.class
 ma/digitbank/jeespringangularjwtdigitalbanking/dtos/AccountOperationDTO.class
 ma/digitbank/jeespringangularjwtdigitalbanking/security/jwt/AuthEntryPointJwt.class
-ma/digitbank/jeespringangularjwtdigitalbanking/security/utils/JwtUtils.class
 ma/digitbank/jeespringangularjwtdigitalbanking/entities/CurrentAccount.class
 ma/digitbank/jeespringangularjwtdigitalbanking/security/jwt/JwtTokenProvider.class
 ma/digitbank/jeespringangularjwtdigitalbanking/JeeSpringAngularJwtDigitalBankingApplication.class

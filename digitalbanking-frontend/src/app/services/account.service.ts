@@ -1,9 +1,8 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AccountHistory, AccountOperation, BankAccount, CurrentAccount, SavingAccount } from '../models/account.model';
 import { environment } from '../../environments/environment';
-import { BankAccount, CurrentAccount, SavingAccount } from '../models/account.model';
-import { AccountHistory, AccountOperation } from '../models/operation.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,7 @@ import { AccountHistory, AccountOperation } from '../models/operation.model';
 export class AccountService {
   private apiUrl = `${environment.apiUrl}/accounts`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAccounts(): Observable<BankAccount[]> {
     return this.http.get<BankAccount[]>(this.apiUrl);
@@ -21,46 +20,49 @@ export class AccountService {
     return this.http.get<BankAccount>(`${this.apiUrl}/${id}`);
   }
 
-  getAccountOperations(id: string): Observable<AccountOperation[]> {
-    return this.http.get<AccountOperation[]>(`${this.apiUrl}/${id}/operations`);
+  getAccountOperations(accountId: string): Observable<AccountOperation[]> {
+    return this.http.get<AccountOperation[]>(`${this.apiUrl}/${accountId}/operations`);
   }
 
-  getAccountHistory(id: string, page: number = 0, size: number = 5): Observable<AccountHistory> {
-    return this.http.get<AccountHistory>(`${this.apiUrl}/${id}/pageOperations?page=${page}&size=${size}`);
-  }
-
-  saveCurrentAccount(initialBalance: number, overDraft: number, customerId: number): Observable<CurrentAccount> {
-    return this.http.post<CurrentAccount>(
-      `${this.apiUrl}/current?initialBalance=${initialBalance}&overDraft=${overDraft}&customerId=${customerId}`, 
-      {}
-    );
-  }
-
-  saveSavingAccount(initialBalance: number, interestRate: number, customerId: number): Observable<SavingAccount> {
-    return this.http.post<SavingAccount>(
-      `${this.apiUrl}/saving?initialBalance=${initialBalance}&interestRate=${interestRate}&customerId=${customerId}`, 
-      {}
-    );
+  getAccountHistory(accountId: string, page: number = 0, size: number = 10): Observable<AccountHistory> {
+    return this.http.get<AccountHistory>(`${this.apiUrl}/${accountId}/operations/page?page=${page}&size=${size}`);
   }
 
   debit(accountId: string, amount: number, description: string): Observable<any> {
-    return this.http.post<any>(
-      `${this.apiUrl}/${accountId}/debit?amount=${amount}&description=${description}`, 
-      {}
-    );
+    return this.http.post(`${this.apiUrl}/${accountId}/operations/debit`, {
+      amount,
+      description
+    });
   }
 
   credit(accountId: string, amount: number, description: string): Observable<any> {
-    return this.http.post<any>(
-      `${this.apiUrl}/${accountId}/credit?amount=${amount}&description=${description}`, 
-      {}
-    );
+    return this.http.post(`${this.apiUrl}/${accountId}/operations/credit`, {
+      amount,
+      description
+    });
   }
 
-  transfer(sourceAccountId: string, destinationAccountId: string, amount: number): Observable<any> {
-    return this.http.post<any>(
-      `${this.apiUrl}/transfer?accountSourceId=${sourceAccountId}&accountDestinationId=${destinationAccountId}&amount=${amount}`, 
-      {}
-    );
+  transfer(accountIdSource: string, accountIdDestination: string, amount: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/transfer`, {
+      accountIdSource,
+      accountIdDestination,
+      amount
+    });
+  }
+
+  saveCurrentAccount(initialBalance: number, overDraft: number, customerId: number): Observable<CurrentAccount> {
+    return this.http.post<CurrentAccount>(`${this.apiUrl}/current`, {
+      initialBalance,
+      overDraft,
+      customerId
+    });
+  }
+
+  saveSavingAccount(initialBalance: number, interestRate: number, customerId: number): Observable<SavingAccount> {
+    return this.http.post<SavingAccount>(`${this.apiUrl}/saving`, {
+      initialBalance,
+      interestRate,
+      customerId
+    });
   }
 }

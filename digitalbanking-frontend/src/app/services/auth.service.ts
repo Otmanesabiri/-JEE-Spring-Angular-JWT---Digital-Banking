@@ -1,104 +1,123 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { StorageService } from './storage.service';
 
-interface AuthResponse {
-  token: string;
-  refreshToken?: string;
-  expiresIn?: number;
-  username: string;
-  roles: string[];
-}
+const API_URL = environment.apiUrl;
+const TOKEN_KEY = 'auth-token';
+const USER_KEY = 'auth-user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth`;
-  private tokenKey = 'jwt_token';
-  private refreshTokenKey = 'refresh_token';
-  private currentUserSubject = new BehaviorSubject<any>(null);
-  
-  public currentUser$ = this.currentUserSubject.asObservable();
-  public isAuthenticated$ = this.currentUser$.pipe(
-    map(user => !!user)
-  );
+  private currentUserSubject: BehaviorSubject<any>;
+  public currentUser: Observable<any>;
 
-  constructor(
-    private http: HttpClient,
-    private storageService: StorageService
-  ) {
-    this.loadStoredUser();
+  constructor(private http: HttpClient) {
+    this.currentUserSubject = new BehaviorSubject<any>(this.getUserFromStorage());
+    this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  login(username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { username, password })
-      .pipe(
-        tap(response => this.setSession(response))
-      );
-  }
-
-  register(username: string, email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, {
+  login(username: string, password: string): Observable<any> {
+    return this.http.post(`${API_URL}/auth/login`, {
       username,
-      email,
       password
+    }).pipe(
+      tap((response: any) => {
+        this.setToken(response.token);
+        this.setUser({
+          username: response.username,
+          roles: response.roles
+        });
+        this.currentUserSubject.next({
+          username: response.username,
+          roles: response.roles
+        });
+      })
+    );
+  }
+
+  register(username: string, password: string, confirmedPassword: string): Observable<any> {
+    return this.http.post(`${API_URL}/auth/signup`, {
+      username,
+      password,
+      confirmedPassword
     });
   }
 
+  changePassword(oldPassword: string, newPassword: string): Observable<any> {
+    return this.http.post(`${API_URL}/auth/changePassword`, {
+      oldPassword,
+      newPassword
+    });
+  }
+
+  getUserProfile(): Observable<any> {
+    return this.http.get(`${API_URL}/auth/profile`);
+  }
+
   logout(): void {
-    this.storageService.removeItem(this.tokenKey);
-    this.storageService.removeItem(this.refreshTokenKey);
+    if (this.isBrowser()) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+    }
     this.currentUserSubject.next(null);
   }
 
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      return of({ token: '', username: '', roles: [] } as AuthResponse);
-    }
-    
-    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh-token`, { refreshToken })
-      .pipe(
-        tap(response => this.setSession(response))
-      );
-  }
-
-  getToken(): string | null {
-    return this.storageService.getItem(this.tokenKey);
-  }
-
-  private getRefreshToken(): string | null {
-    return this.storageService.getItem(this.refreshTokenKey);
+  public get currentUserValue(): any {
+    return this.currentUserSubject.value;
   }
 
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  private setSession(authResult: AuthResponse): void {
-    this.storageService.setItem(this.tokenKey, authResult.token);
-    if (authResult.refreshToken) {
-      this.storageService.setItem(this.refreshTokenKey, authResult.refreshToken);
+  getToken(): string | null {
+    if (this.isBrowser()) {
+      return localStorage.getItem(TOKEN_KEY);
     }
-    
-    this.currentUserSubject.next({
-      username: authResult.username,
-      roles: authResult.roles
-    });
+    return null;
   }
 
-  private loadStoredUser(): void {
-    const token = this.getToken();
-    if (token) {
-      // For now we're just setting a basic user object when token exists
-      this.currentUserSubject.next({
-        username: 'Stored User',
-        roles: []
-      });
+  setToken(token: string): void {
+    if (this.isBrowser()) {
+      localStorage.setItem(TOKEN_KEY, token);
     }
+  }
+
+  getUser(): any {
+    return this.getUserFromStorage();
+  }
+
+  setUser(user: any): void {
+    if (this.isBrowser()) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    }
+  }
+
+  getUserFromStorage(): any {
+    if (this.isBrowser()) {
+      const user = localStorage.getItem(USER_KEY);
+      if (user) {
+        return JSON.parse(user);
+      }
+    }
+    return null;
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.currentUserValue;
+    if (!user || !user.roles) return false;
+    return user.roles.includes(role);
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('ADMIN');
+  }
+
+  // Fonction utilitaire pour vérifier si nous sommes dans un navigateur
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined';
   }
 }

@@ -1,25 +1,39 @@
 import { Customer } from './customer.model';
 
-export enum AccountStatus {
-    CREATED = 'CREATED',
-    ACTIVATED = 'ACTIVATED',
-    SUSPENDED = 'SUSPENDED',
-    BLOCKED = 'BLOCKED'
-}
-
 export interface BankAccount {
-    id: string;
-    balance: number;
-    createdAt: Date;
-    status: AccountStatus;
-    customerDTO: Customer;
-    type: string;
+  id: string;
+  balance: number;
+  createdAt: Date;
+  status: string;
+  type: string;
+  customerDTO: Customer;
+  currency?: string;
 }
 
 export interface CurrentAccount extends BankAccount {
-    overDraft: number;
+  overDraft: number;
+  type: 'CurrentAccount';
 }
 
 export interface SavingAccount extends BankAccount {
-    interestRate: number;
+  interestRate: number;
+  type: 'SavingAccount';
+}
+
+export interface AccountOperation {
+  id: number;
+  operationDate: Date;
+  amount: number;
+  description: string;
+  type: string;
+  bankAccountId: string;
+}
+
+export interface AccountHistory {
+  accountId: string;
+  balance: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  accountOperationDTOS: AccountOperation[];
 }

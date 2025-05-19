@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.digitbank.jeespringangularjwtdigitalbanking.security.service.JWTService;
 import org.springframework.context.annotation.Lazy;
@@ -26,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
 
-    // Using constructor injection with @Lazy annotation instead of @RequiredArgsConstructor
+    // Constructeur manuel - suppression de @RequiredArgsConstructor
     public JwtAuthenticationFilter(JWTService jwtService, @Lazy UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;

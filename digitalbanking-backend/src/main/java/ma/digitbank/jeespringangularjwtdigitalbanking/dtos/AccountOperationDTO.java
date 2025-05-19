@@ -13,4 +13,9 @@ public class AccountOperationDTO {
     private String description;
     private OperationType type;
     private String bankAccountId;
+    private String accountHolderName;
+    private String accountHolderEmail;
+    private String accountHolderPhone;
+    private String accountHolderAddress;
+   
 }
