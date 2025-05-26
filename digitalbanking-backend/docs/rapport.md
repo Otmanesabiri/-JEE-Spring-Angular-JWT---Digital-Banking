@@ -355,14 +355,19 @@ Cette section présente les différentes interfaces et fonctionnalités de l'app
 
 Le diagramme de classes du backend illustre les relations entre les entités principales du système:
 
-![Diagramme de classes](class-diagram.png)
+![Diagramme de classes](../../assets/images/class-diagram.png)
+![Diagramme de classes](../../assets/images/class-diagram2.png)
+![Diagramme de classes](../../assets/images/class-diagram3.png)
+![Diagramme de classes](../../assets/images/class-diagram4.png)
+![Diagramme de classes](../../assets/images/class-diagram5.png)
+
 *Description: Diagramme UML des principales classes du système*
 
 ### Diagramme de séquence
 
 Le diagramme de séquence illustre le flux d'authentification et d'opération bancaire:
 
-![Diagramme de séquence](sequence-diagram.png)
+![Diagramme de séquence](../../assets/images/sequence-diagram.png)
 *Description: Flux d'authentification et d'opération bancaire*
 
 ## Améliorations futures
