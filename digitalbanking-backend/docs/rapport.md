@@ -1,5 +1,7 @@
 # Rapport du Projet Digital Banking
 
+![video démonstratif](../../assets/videos/demo.mp4)
+
 ## Table des matières
 
 1. [Introduction](#introduction)
