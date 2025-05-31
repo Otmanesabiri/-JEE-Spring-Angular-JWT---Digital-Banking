@@ -4,14 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import ma.digitbank.jeespringangularjwtdigitalbanking.dtos.*;
 import ma.digitbank.jeespringangularjwtdigitalbanking.exceptions.BalanceNotSufficientException;
 import ma.digitbank.jeespringangularjwtdigitalbanking.exceptions.BankAccountNotFoundException;
 import ma.digitbank.jeespringangularjwtdigitalbanking.exceptions.CustomerNotFoundException;
 import ma.digitbank.jeespringangularjwtdigitalbanking.services.BankAccountService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;

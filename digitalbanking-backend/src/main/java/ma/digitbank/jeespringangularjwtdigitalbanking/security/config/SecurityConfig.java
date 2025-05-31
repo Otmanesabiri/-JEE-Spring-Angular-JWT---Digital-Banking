@@ -52,7 +52,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .headers(headers -> headers.frameOptions().disable()); // Pour H2 console
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // Pour H2 console
 
         return http.build();
     }

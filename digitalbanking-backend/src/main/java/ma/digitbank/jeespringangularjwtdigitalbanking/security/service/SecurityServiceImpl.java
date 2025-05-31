@@ -6,7 +6,6 @@ import ma.digitbank.jeespringangularjwtdigitalbanking.security.entities.AppRole;
 import ma.digitbank.jeespringangularjwtdigitalbanking.security.entities.AppUser;
 import ma.digitbank.jeespringangularjwtdigitalbanking.security.repositories.AppRoleRepository;
 import ma.digitbank.jeespringangularjwtdigitalbanking.security.repositories.AppUserRepository;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

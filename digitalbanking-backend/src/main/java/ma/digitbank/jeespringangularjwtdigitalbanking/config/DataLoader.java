@@ -5,14 +5,11 @@ import ma.digitbank.jeespringangularjwtdigitalbanking.dtos.CustomerDTO;
 import ma.digitbank.jeespringangularjwtdigitalbanking.dtos.CurrentAccountDTO;
 import ma.digitbank.jeespringangularjwtdigitalbanking.dtos.SavingAccountDTO;
 import ma.digitbank.jeespringangularjwtdigitalbanking.enums.AccountStatus;
-import ma.digitbank.jeespringangularjwtdigitalbanking.enums.OperationType;
 import ma.digitbank.jeespringangularjwtdigitalbanking.services.BankAccountService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Configuration
@@ -20,7 +17,6 @@ import java.util.stream.Stream;
 public class DataLoader {
 
     private final BankAccountService bankAccountService;
-    private final PasswordEncoder passwordEncoder;
 
     @Bean
     CommandLineRunner initDatabase() {
