@@ -1,0 +1,432 @@
+@startuml Digital Banking System - Updated Architecture
+
+' Style settings
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #F5F5DC
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #8B4513
+    BorderThickness 2
+    ArrowColor #654321
+}
+skinparam package {
+    BackgroundColor #D2B48C
+    BorderColor #8B4513
+    FontColor #654321
+}
+
+' Frontend Package
+package "Angular Frontend" {
+    class NavbarComponent {
+        -isLoggedIn: boolean
+        -isAdmin: boolean
+        -username: string
+        +logout(): void
+        +ngOnInit(): void
+    }
+    
+    class DashboardComponent {
+        -totalCustomers: number
+        -totalAccounts: number
+        -totalBalance: number
+        -totalOperations: number
+        -recentActivities: AccountOperation[]
+        +loadDashboardData(): void
+        +getOperationTypeClass(): string
+    }
+    
+    class CustomersComponent {
+        -customers: Customer[]
+        -searchTerm: string
+        +loadCustomers(): void
+        +openCreateCustomerModal(): void
+        +deleteCustomer(): void
+        +get filteredCustomers(): Customer[]
+    }
+    
+    class AccountsComponent {
+        -accounts: BankAccount[]
+        -searchTerm: string
+        +loadAccounts(): void
+        +openTransferModal(): void
+        +getStatusClass(): string
+        +get filteredAccounts(): BankAccount[]
+    }
+    
+    class LoginComponent {
+        -loginForm: FormGroup
+        -isLoading: boolean
+        -errorMessage: string
+        +onSubmit(): void
+    }
+    
+    class CustomerDetailsComponent {
+        -customer: Customer
+        -accounts: BankAccount[]
+        -isLoading: boolean
+        +loadCustomerDetails(): void
+        +loadCustomerAccounts(): void
+    }
+    
+    class AccountFormComponent {
+        -accountForm: FormGroup
+        -accountType: string
+        -customers: Customer[]
+        +onSubmit(): void
+        +loadCustomers(): void
+    }
+}
+
+' Services Package
+package "Angular Services" {
+    class AuthService {
+        -currentUserSubject: BehaviorSubject
+        -baseUrl: string
+        +login(): Observable
+        +logout(): void
+        +isLoggedIn(): boolean
+        +isAdmin(): boolean
+    }
+    
+    class CustomerService {
+        -baseUrl: string
+        +getCustomers(): Observable
+        +getCustomer(): Observable
+        +saveCustomer(): Observable
+        +updateCustomer(): Observable
+        +deleteCustomer(): Observable
+        +getCustomerAccounts(): Observable
+    }
+    
+    class AccountService {
+        -baseUrl: string
+        +getAccounts(): Observable
+        +getBankAccount(): Observable
+        +saveCurrentAccount(): Observable
+        +saveSavingAccount(): Observable
+    }
+}
+
+' Backend Entities
+package "Backend Entities" {
+    abstract class BankAccount {
+        -id: String
+        -balance: double
+        -createdAt: Date
+        -currency: String
+        -status: AccountStatus
+        -createdBy: String
+        -lastModifiedBy: String
+    }
+    
+    class SavingAccount {
+        -interestRate: double
+    }
+    
+    class CurrentAccount {
+        -overDraft: double
+    }
+    
+    class Customer {
+        -id: Long
+        -name: String
+        -email: String
+        -phone: String
+        -createdBy: String
+        -lastModifiedBy: String
+    }
+    
+    class AccountOperation {
+        -id: Long
+        -operationDate: Date
+        -amount: double
+        -description: String
+        -type: OperationType
+        -createdBy: String
+    }
+}
+
+' Security Entities
+package "Security Layer" {
+    class AppUser {
+        -id: Long
+        -username: String
+        -password: String
+        -active: boolean
+    }
+    
+    class AppRole {
+        -id: Long
+        -roleName: String
+    }
+    
+    class JwtUtils {
+        -jwtSecret: String
+        -jwtExpirationMs: long
+        +generateJwtToken(): String
+        +getUsernameFromJwtToken(): String
+        +validateJwtToken(): boolean
+    }
+    
+    class JWTService {
+        -secretKey: String
+        -jwtExpiration: long
+        +extractUsername(): String
+        +generateToken(): String
+        +isTokenValid(): boolean
+    }
+    
+    class JwtAuthenticationFilter {
+        +doFilterInternal(): void
+    }
+}
+
+' Backend Services
+package "Backend Services" {
+    interface BankAccountService {
+        +saveCustomer(): CustomerDTO
+        +updateCustomer(): CustomerDTO
+        +deleteCustomer(): void
+        +listCustomers(): List<CustomerDTO>
+        +getCustomer(): CustomerDTO
+        +saveCurrentBankAccount(): CurrentAccountDTO
+        +saveSavingBankAccount(): SavingAccountDTO
+        +listBankAccounts(): List<BankAccountDTO>
+        +getBankAccount(): BankAccountDTO
+        +debit(): void
+        +credit(): void
+        +transfer(): void
+        +accountHistory(): AccountHistoryDTO
+    }
+    
+    class BankAccountServiceImpl {
+        -customerRepository: CustomerRepository
+        -bankAccountRepository: BankAccountRepository
+        -accountOperationRepository: AccountOperationRepository
+        -dtoMapper: BankAccountMapperImpl
+        +getCurrentUsername(): String
+    }
+    
+    interface SecurityService {
+        +saveNewUser(): AppUser
+        +saveNewRole(): AppRole
+        +addRoleToUser(): void
+        +loadUserByUsername(): AppUser
+        +changePassword(): boolean
+    }
+    
+    class SecurityServiceImpl {
+        -appUserRepository: AppUserRepository
+        -appRoleRepository: AppRoleRepository
+        -passwordEncoder: PasswordEncoder
+    }
+}
+
+' Controllers
+package "REST Controllers" {
+    class AuthController {
+        -authenticationManager: AuthenticationManager
+        -jwtUtils: JwtUtils
+        -securityService: SecurityService
+        +authenticateUser(): ResponseEntity
+        +registerUser(): ResponseEntity
+        +changePassword(): ResponseEntity
+        +getUserProfile(): ResponseEntity
+    }
+    
+    class CustomerRestController {
+        -bankAccountService: BankAccountService
+        +getCustomers(): List<CustomerDTO>
+        +getCustomer(): CustomerDTO
+        +saveCustomer(): CustomerDTO
+        +updateCustomer(): CustomerDTO
+        +deleteCustomer(): void
+        +getCustomerAccounts(): List<BankAccountDTO>
+    }
+    
+    class BankAccountRestController {
+        -bankAccountService: BankAccountService
+        +listBankAccounts(): List<BankAccountDTO>
+        +getBankAccount(): BankAccountDTO
+        +saveCurrentAccount(): CurrentAccountDTO
+        +saveSavingAccount(): SavingAccountDTO
+        +debit(): void
+        +credit(): void
+        +transfer(): void
+        +getOperations(): List<AccountOperationDTO>
+        +getAccountHistory(): AccountHistoryDTO
+    }
+    
+    class UserManagementController {
+        -securityService: SecurityService
+        +listUsers(): List<AppUser>
+        +saveRole(): void
+        +addRoleToUser(): void
+        +removeRoleFromUser(): void
+    }
+}
+
+' DTOs
+package "Data Transfer Objects" {
+    class CustomerDTO {
+        -id: Long
+        -name: String
+        -email: String
+        -phone: String
+    }
+    
+    abstract class BankAccountDTO {
+        -id: String
+        -balance: double
+        -createdAt: Date
+        -status: AccountStatus
+        -customerDTO: CustomerDTO
+        -type: String
+    }
+    
+    class CurrentAccountDTO {
+        -overDraft: double
+        -currency: String
+    }
+    
+    class SavingAccountDTO {
+        -interestRate: double
+        -currency: String
+    }
+    
+    class AccountOperationDTO {
+        -id: Long
+        -operationDate: Date
+        -amount: double
+        -description: String
+        -type: OperationType
+        -bankAccountId: String
+    }
+    
+    class LoginRequest {
+        -username: String
+        -password: String
+    }
+    
+    class JwtResponse {
+        -token: String
+        -type: String
+        -username: String
+        -roles: List<String>
+    }
+    
+    class SignupRequest {
+        -username: String
+        -password: String
+        -confirmedPassword: String
+    }
+}
+
+' Configuration
+package "Configuration" {
+    class SecurityConfig {
+        +securityFilterChain(): SecurityFilterChain
+    }
+    
+    class ApplicationConfig {
+        +passwordEncoder(): PasswordEncoder
+        +authenticationProvider(): AuthenticationProvider
+        +authenticationManager(): AuthenticationManager
+    }
+    
+    class CorsConfig {
+        +corsFilter(): CorsFilter
+    }
+}
+
+' Repositories
+package "Repositories" {
+    interface CustomerRepository {
+        +findByNameContainsIgnoreCase(): List<Customer>
+        +findByEmail(): Customer
+    }
+    
+    interface BankAccountRepository {
+        +findByCustomerId(): List<BankAccount>
+    }
+    
+    interface AccountOperationRepository {
+        +findByBankAccountId(): List<AccountOperation>
+        +findByBankAccountIdOrderByOperationDateDesc(): Page<AccountOperation>
+    }
+    
+    interface AppUserRepository {
+        +findByUsername(): AppUser
+    }
+    
+    interface AppRoleRepository {
+        +findByRoleName(): AppRole
+    }
+}
+
+' Enums
+package "Enums" {
+    enum AccountStatus {
+        CREATED
+        ACTIVATED
+        SUSPENDED
+        BLOCKED
+    }
+    
+    enum OperationType {
+        DEBIT
+        CREDIT
+    }
+}
+
+' Relations - Inheritance
+BankAccount <|-- SavingAccount
+BankAccount <|-- CurrentAccount
+BankAccountDTO <|-- CurrentAccountDTO
+BankAccountDTO <|-- SavingAccountDTO
+
+' Relations - Composition
+Customer "1" --* "many" BankAccount
+BankAccount "1" --* "many" AccountOperation
+AppUser "many" -- "many" AppRole
+
+' Relations - Service Implementation
+BankAccountService <|.. BankAccountServiceImpl
+SecurityService <|.. SecurityServiceImpl
+
+' Relations - Controllers to Services
+AuthController --> SecurityService
+AuthController --> JwtUtils
+CustomerRestController --> BankAccountService
+BankAccountRestController --> BankAccountService
+UserManagementController --> SecurityService
+
+' Relations - Service to Repository
+BankAccountServiceImpl --> CustomerRepository
+BankAccountServiceImpl --> BankAccountRepository
+BankAccountServiceImpl --> AccountOperationRepository
+SecurityServiceImpl --> AppUserRepository
+SecurityServiceImpl --> AppRoleRepository
+
+' Relations - Frontend to Services
+NavbarComponent --> AuthService
+DashboardComponent --> CustomerService
+DashboardComponent --> AccountService
+CustomersComponent --> CustomerService
+AccountsComponent --> AccountService
+LoginComponent --> AuthService
+CustomerDetailsComponent --> CustomerService
+AccountFormComponent --> CustomerService
+AccountFormComponent --> AccountService
+
+' Relations - Services to Backend
+AuthService ..> AuthController : HTTP
+CustomerService ..> CustomerRestController : HTTP
+AccountService ..> BankAccountRestController : HTTP
+
+' Security Filter Chain
+JwtAuthenticationFilter --> JWTService
+SecurityConfig --> JwtAuthenticationFilter
+SecurityConfig --> ApplicationConfig
+
+@enduml

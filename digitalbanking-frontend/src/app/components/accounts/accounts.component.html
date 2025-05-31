@@ -1,127 +1,184 @@
-<div class="container mt-4">
-  <div class="row mb-4">
-    <div class="col">
-      <h1>Bank Accounts</h1>
-      <p class="text-muted">Manage customer accounts</p>
+<div class="accounts-container">
+  <div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+      <h1 class="display-4 text-gradient mb-3">
+        <i class="bi bi-credit-card me-3"></i>Account Management
+      </h1>
+      <p class="lead text-coffee">Manage all banking accounts efficiently</p>
     </div>
-  </div>
-  
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="input-group" style="max-width: 300px;">
-      <input 
-        type="text" 
-        class="form-control" 
-        id="searchAccount" 
-        name="searchAccount" 
-        placeholder="Search accounts..." 
-        [(ngModel)]="searchTerm"
-      >
-      <button class="btn btn-outline-secondary" type="button" *ngIf="searchTerm" (click)="searchTerm = ''" title="Clear search" aria-label="Clear search">
-        <i class="bi bi-x"></i>
-      </button>
-    </div>
-    
-    <div class="btn-group">
-      <a routerLink="/accounts/new/current" class="btn btn-outline-primary me-2">
-        <i class="bi bi-wallet2"></i> New Current Account
-      </a>
-      <a routerLink="/accounts/new/saving" class="btn btn-outline-success me-2">
-        <i class="bi bi-piggy-bank"></i> New Saving Account
-      </a>
-      <button class="btn btn-outline-info" (click)="openTransferModal()">
-        <i class="bi bi-arrow-left-right"></i> Transfer
-      </button>
-    </div>
-  </div>
-  
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
-  
-  <div class="row mb-4">
-    <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-      <div class="card bg-light">
-        <div class="card-body text-center">
-          <h5 class="card-title">Total Accounts</h5>
-          <p class="display-4">{{ accounts.length }}</p>
+
+    <!-- Statistics Row -->
+    <div class="row mb-5">
+      <div class="col-md-3 mb-4">
+        <div class="stats-card fade-in-up">
+          <div class="icon">
+            <i class="bi bi-credit-card-2-front"></i>
+          </div>
+          <div class="value">{{ filteredAccounts.length }}</div>
+          <div class="label">Total Accounts</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-4">
+        <div class="stats-card fade-in-up stats-card-delay-1">
+          <div class="icon">
+            <i class="bi bi-wallet"></i>
+          </div>
+          <div class="value">{{ currentAccountsCount }}</div>
+          <div class="label">Current Accounts</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-4">
+        <div class="stats-card fade-in-up stats-card-delay-2">
+          <div class="icon">
+            <i class="bi bi-piggy-bank"></i>
+          </div>
+          <div class="value">{{ savingAccountsCount }}</div>
+          <div class="label">Saving Accounts</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-4">
+        <div class="stats-card fade-in-up stats-card-delay-3">
+          <div class="icon">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div class="value">{{ totalBalance | currency:'USD':'symbol':'1.0-0' }}</div>
+          <div class="label">Total Balance</div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-      <div class="card bg-primary text-white">
-        <div class="card-body text-center">
-          <h5 class="card-title">Current Accounts</h5>
-          <p class="display-4">{{ currentAccountsCount }}</p>
+
+    <!-- Action Bar -->
+    <div class="action-bar mb-4">
+      <div class="search-container">
+        <div class="input-group modern-search">
+          <span class="input-group-text">
+            <i class="bi bi-search"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Search accounts by ID, customer, or type..." 
+            [(ngModel)]="searchTerm"
+          >
+          <button class="btn btn-outline-secondary" type="button" *ngIf="searchTerm" (click)="searchTerm = ''" title="Clear search">
+            <i class="bi bi-x"></i>
+          </button>
         </div>
       </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-      <div class="card bg-success text-white">
-        <div class="card-body text-center">
-          <h5 class="card-title">Saving Accounts</h5>
-          <p class="display-4">{{ savingAccountsCount }}</p>
+      
+      <div class="action-buttons">
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle me-2" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-plus-circle me-2"></i>New Account
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/accounts/new/current">
+              <i class="bi bi-wallet me-2"></i>Current Account
+            </a></li>
+            <li><a class="dropdown-item" routerLink="/accounts/new/saving">
+              <i class="bi bi-piggy-bank me-2"></i>Saving Account
+            </a></li>
+          </ul>
         </div>
+        
+        <button class="btn btn-info" (click)="openTransferModal()">
+          <i class="bi bi-arrow-left-right me-2"></i>Transfer Funds
+        </button>
       </div>
     </div>
-    <div class="col-md-6 col-lg-3">
-      <div class="card bg-info text-white">
-        <div class="card-body text-center">
-          <h5 class="card-title">Total Balance</h5>
-          <p class="display-4">
-            {{ totalBalance | currency }}
-          </p>
-        </div>
-      </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-danger modern-alert" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
     </div>
-  </div>
-  
-  <div class="card">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-striped table-hover mb-0">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Customer</th>
-              <th>Type</th>
-              <th>Balance</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let account of filteredAccounts">
-              <td>{{ account.id }}</td>
-              <td>{{ account.customerDTO.name }}</td>
-              <td>
-                <span class="badge bg-primary" *ngIf="account.type === 'CurrentAccount'">
-                  <i class="bi bi-wallet2 me-1"></i> Current
-                </span>
-                <span class="badge bg-success" *ngIf="account.type === 'SavingAccount'">
-                  <i class="bi bi-piggy-bank me-1"></i> Saving
-                </span>
-              </td>
-              <td>{{ account.balance | currency }}</td>
-              <td>
-                <span class="badge" [ngClass]="getStatusClass(account.status)">
-                  {{ account.status }}
-                </span>
-              </td>
-              <td>{{ account.createdAt | date:'short' }}</td>
-              <td>
-                <a [routerLink]="['/accounts', account.id]" class="btn btn-sm btn-info me-1">
-                  <i class="bi bi-eye"></i>
-                </a>
-              </td>
-            </tr>
-            <tr *ngIf="filteredAccounts.length === 0">
-              <td colspan="7" class="text-center py-3">
-                No accounts found
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+    <!-- Accounts Table -->
+    <div class="data-card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="bi bi-table me-2"></i>Bank Accounts
+          <span class="badge bg-light text-dark ms-2">{{ filteredAccounts.length }}</span>
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover modern-table mb-0">
+            <thead>
+              <tr>
+                <th><i class="bi bi-hash me-1"></i>Account ID</th>
+                <th><i class="bi bi-person me-1"></i>Customer</th>
+                <th><i class="bi bi-credit-card me-1"></i>Type</th>
+                <th><i class="bi bi-currency-dollar me-1"></i>Balance</th>
+                <th><i class="bi bi-calendar me-1"></i>Created</th>
+                <th><i class="bi bi-info-circle me-1"></i>Status</th>
+                <th><i class="bi bi-gear me-1"></i>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let account of filteredAccounts" class="table-row">
+                <td class="fw-semibold">
+                  <span class="account-id">{{ account.id }}</span>
+                </td>
+                <td>
+                  <div class="customer-info">
+                    <i class="bi bi-person-circle me-2 text-primary-brown"></i>
+                    <div>
+                      <div class="customer-name">{{ account.customerDTO.name }}</div>
+                      <small class="text-muted">{{ account.customerDTO.email }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [class]="account.type === 'CurrentAccount' ? 'bg-info' : 'bg-success'">
+                    <i class="bi" [class]="account.type === 'CurrentAccount' ? 'bi-wallet' : 'bi-piggy-bank'"></i>
+                    {{ account.type === 'CurrentAccount' ? 'Current' : 'Saving' }}
+                  </span>
+                </td>
+                <td class="fw-bold text-end">
+                  <span class="balance-amount" [class]="account.balance >= 0 ? 'text-success' : 'text-danger'">
+                    {{ account.balance | currency:'USD':'symbol':'1.2-2' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="date-info">
+                    {{ account.createdAt | date:'MMM d, yyyy' }}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [class]="getStatusClass(account.status)">
+                    {{ account.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a [routerLink]="['/accounts', account.id]" class="btn btn-sm btn-info me-1" title="View Details">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <button class="btn btn-sm btn-warning me-1" title="Operations">
+                      <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                    <button class="btn btn-sm btn-success" title="Account History">
+                      <i class="bi bi-clock-history"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredAccounts.length === 0">
+                <td colspan="7" class="text-center py-5">
+                  <div class="empty-state">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                    <h5 class="mt-3 text-muted">No accounts found</h5>
+                    <p class="text-muted">Try adjusting your search terms or create a new account</p>
+                    <button class="btn btn-primary mt-2" routerLink="/accounts/new/current">
+                      <i class="bi bi-plus-circle me-2"></i>Create First Account
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

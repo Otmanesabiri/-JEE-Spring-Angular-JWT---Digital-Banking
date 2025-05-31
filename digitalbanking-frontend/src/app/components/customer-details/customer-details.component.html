@@ -1,88 +1,197 @@
-<div class="container mt-4">
-  <div *ngIf="isLoading" class="d-flex justify-content-center">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
+<div class="customer-details-container">
+  <div class="container-fluid">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary-brown loading-spinner" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-coffee">Loading customer details...</p>
     </div>
-  </div>
 
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
-  
-  <div *ngIf="customer && !isLoading">
-    <div class="row mb-4">
-      <div class="col">
-        <h1>{{ customer.name }}</h1>
+    <!-- Error State -->
+    <div *ngIf="errorMessage" class="alert alert-danger modern-alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+    </div>
+
+    <!-- Customer Details -->
+    <div *ngIf="customer && !isLoading">
+      <!-- Page Header -->
+      <div class="page-header mb-4">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a routerLink="/customers">Customers</a></li>
+            <li class="breadcrumb-item">
+              <a routerLink="/customers" class="text-decoration-none text-primary-brown">
+                <i class="bi bi-people me-1"></i>Customers
+              </a>
+            </li>
             <li class="breadcrumb-item active" aria-current="page">{{ customer.name }}</li>
           </ol>
         </nav>
-      </div>
-      <div class="col-auto">
-        <div class="btn-group">
-          <button class="btn btn-outline-secondary">
-            <i class="bi bi-pencil"></i> Edit
-          </button>
-          <button class="btn btn-outline-danger">
-            <i class="bi bi-trash"></i> Delete
-          </button>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="display-5 text-gradient mb-2">
+              <i class="bi bi-person-circle me-3"></i>{{ customer.name }}
+            </h1>
+            <p class="lead text-coffee mb-0">Customer Profile & Account Overview</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-outline-primary me-2">
+              <i class="bi bi-pencil me-2"></i>Edit Customer
+            </button>
+            <div class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-plus-circle me-2"></i>New Account
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">
+                  <i class="bi bi-wallet me-2"></i>Current Account
+                </a></li>
+                <li><a class="dropdown-item" href="#">
+                  <i class="bi bi-piggy-bank me-2"></i>Saving Account
+                </a></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <div class="card mb-4">
-          <div class="card-header">
-            <h5 class="mb-0">Customer Details</h5>
-          </div>
-          <div class="card-body">
-            <p><strong>ID:</strong> {{ customer.id }}</p>
-            <p><strong>Name:</strong> {{ customer.name }}</p>
-            <p><strong>Email:</strong> {{ customer.email }}</p>
-            <p *ngIf="customer.phone"><strong>Phone:</strong> {{ customer.phone }}</p>
+      <div class="row">
+        <!-- Customer Information Card -->
+        <div class="col-lg-4 mb-4">
+          <div class="card shadow-brown rounded-modern h-100">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="bi bi-person-badge me-2"></i>Customer Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="customer-avatar text-center mb-4">
+                <div class="avatar-circle">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="mt-3 text-dark-brown">{{ customer.name }}</h4>
+              </div>
+              
+              <div class="customer-details">
+                <div class="detail-item mb-3">
+                  <div class="detail-label">
+                    <i class="bi bi-hash me-2"></i>Customer ID
+                  </div>
+                  <div class="detail-value">{{ customer.id }}</div>
+                </div>
+                
+                <div class="detail-item mb-3">
+                  <div class="detail-label">
+                    <i class="bi bi-envelope me-2"></i>Email Address
+                  </div>
+                  <div class="detail-value">
+                    <a href="mailto:{{ customer.email }}" class="text-decoration-none text-primary-brown">
+                      {{ customer.email }}
+                    </a>
+                  </div>
+                </div>
+                
+                <div class="detail-item mb-3" *ngIf="customer.phone">
+                  <div class="detail-label">
+                    <i class="bi bi-telephone me-2"></i>Phone Number
+                  </div>
+                  <div class="detail-value">
+                    <a href="tel:{{ customer.phone }}" class="text-decoration-none text-primary-brown">
+                      {{ customer.phone }}
+                    </a>
+                  </div>
+                </div>
+                
+                <div class="detail-item">
+                  <div class="detail-label">
+                    <i class="bi bi-credit-card me-2"></i>Total Accounts
+                  </div>
+                  <div class="detail-value">
+                    <span class="badge bg-primary">{{ accounts.length }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Accounts</h5>
-            <div class="btn-group">
-              <a [routerLink]="['/accounts/new/current', { customerId: customer.id }]" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-wallet2"></i> New Current
-              </a>
-              <a [routerLink]="['/accounts/new/saving', { customerId: customer.id }]" class="btn btn-sm btn-outline-success">
-                <i class="bi bi-piggy-bank"></i> New Saving
-              </a>
+
+        <!-- Accounts List -->
+        <div class="col-lg-8 mb-4">
+          <div class="card shadow-brown rounded-modern">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="bi bi-credit-card me-2"></i>Bank Accounts
+                <span class="badge bg-light text-dark ms-2">{{ accounts.length }}</span>
+              </h5>
             </div>
-          </div>
-          <div class="card-body p-0">
-            <div *ngIf="accounts.length === 0" class="text-center py-3">
-              No accounts found for this customer.
+            <div class="card-body p-0">
+              <div class="table-responsive" *ngIf="accounts.length > 0">
+                <table class="table table-hover modern-table mb-0">
+                  <thead>
+                    <tr>
+                      <th><i class="bi bi-hash me-1"></i>Account ID</th>
+                      <th><i class="bi bi-credit-card me-1"></i>Type</th>
+                      <th><i class="bi bi-currency-dollar me-1"></i>Balance</th>
+                      <th><i class="bi bi-calendar me-1"></i>Created</th>
+                      <th><i class="bi bi-info-circle me-1"></i>Status</th>
+                      <th><i class="bi bi-gear me-1"></i>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let account of accounts" class="table-row">
+                      <td class="fw-semibold">
+                        <span class="account-id">{{ account.id }}</span>
+                      </td>
+                      <td>
+                        <span class="badge" [class]="account.type === 'CurrentAccount' ? 'bg-info' : 'bg-success'">
+                          <i class="bi" [class]="account.type === 'CurrentAccount' ? 'bi-wallet' : 'bi-piggy-bank'"></i>
+                          {{ getAccountTypeLabel(account.type) }}
+                        </span>
+                      </td>
+                      <td class="fw-bold text-end">
+                        <span [class]="account.balance >= 0 ? 'text-success' : 'text-danger'">
+                          {{ account.balance | currency:'USD':'symbol':'1.2-2' }}
+                        </span>
+                      </td>
+                      <td>
+                        <small class="text-muted">{{ account.createdAt | date:'MMM d, yyyy' }}</small>
+                      </td>
+                      <td>
+                        <span class="badge" [class]="getStatusClass(account.status)">
+                          {{ account.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="action-buttons">
+                          <a [routerLink]="['/accounts', account.id]" class="btn btn-sm btn-info me-1" title="View Details">
+                            <i class="bi bi-eye"></i>
+                          </a>
+                          <button class="btn btn-sm btn-warning me-1" title="Operations">
+                            <i class="bi bi-arrow-left-right"></i>
+                          </button>
+                          <button class="btn btn-sm btn-success" title="History">
+                            <i class="bi bi-clock-history"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Empty State -->
+              <div *ngIf="accounts.length === 0" class="text-center py-5">
+                <div class="empty-state">
+                  <i class="bi bi-credit-card display-4 text-muted"></i>
+                  <h5 class="mt-3 text-muted">No accounts found</h5>
+                  <p class="text-muted">This customer doesn't have any bank accounts yet</p>
+                  <button class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-circle me-2"></i>Create First Account
+                  </button>
+                </div>
+              </div>
             </div>
-            <ul class="list-group list-group-flush" *ngIf="accounts.length > 0">
-              <li class="list-group-item" *ngFor="let account of accounts">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-0">{{ account.id }}</h6>
-                    <small class="text-muted">{{ getAccountTypeLabel(account.type) }}</small>
-                  </div>
-                  <div>
-                    <span class="badge" [ngClass]="getStatusClass(account.status)">{{ account.status }}</span>
-                    <span class="ms-2">{{ account.balance | currency }}</span>
-                  </div>
-                </div>
-                <div class="mt-2">
-                  <a [routerLink]="['/accounts', account.id]" class="btn btn-sm btn-outline-info">
-                    <i class="bi bi-eye"></i> View Details
-                  </a>
-                </div>
-              </li>
-            </ul>
           </div>
         </div>
       </div>

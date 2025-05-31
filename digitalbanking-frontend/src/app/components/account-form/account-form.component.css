@@ -8,3 +8,82 @@
 .form-label {
   font-weight: 500;
 }
+
+.account-form-container {
+  background: linear-gradient(135deg, #F5F5DC 0%, #D2B48C 50%, #A0522D 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.account-form-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(139,69,19,0.05)" points="0,300 1000,100 1000,1000 0,700"/></svg>');
+  background-size: cover;
+}
+
+.form-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  color: #F5F5DC;
+}
+
+.modern-select {
+  border: 2px solid #D2B48C;
+  border-radius: 12px;
+  padding: 0.875rem 1.25rem;
+  background: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.modern-select:focus {
+  border-color: #8B4513;
+  box-shadow: 0 0 0 0.25rem rgba(139, 69, 19, 0.15);
+}
+
+.modern-input {
+  border-radius: 0 12px 12px 0;
+  border-left: none;
+}
+
+.modern-btn {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 15px rgba(139, 69, 19, 0.2);
+}
+
+.modern-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #654321 0%, #8B4513 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(139, 69, 19, 0.3);
+}
+
+.modern-alert {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 6px rgba(205, 92, 92, 0.1);
+}
+
+.alert-success.modern-alert {
+  background: linear-gradient(135deg, #8FBC8F 0%, #90EE90 100%);
+  color: #654321;
+}
+
+@media (max-width: 768px) {
+  .account-form-container {
+    padding: 1rem 0;
+  }
+  
+  .form-icon {
+    font-size: 3rem;
+  }
+}

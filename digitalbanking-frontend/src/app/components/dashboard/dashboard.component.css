@@ -40,12 +40,170 @@
   font-size: 2rem;
 }
 
+.dashboard-container {
+  background: linear-gradient(135deg, var(--cream) 0%, rgba(245, 245, 220, 0.3) 50%, var(--champagne) 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(139,69,19,0.03)" points="0,0 1000,200 1000,1000 0,800"/></svg>');
+  background-size: cover;
+  pointer-events: none;
+}
+
+.page-header {
+  position: relative;
+  z-index: 1;
+}
+
+.display-4 {
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.1);
+}
+
+.stats-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 220, 0.9) 100%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--light-brown) 0%, var(--primary-brown) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.stats-card:hover::before {
+  opacity: 0.1;
+}
+
+.stats-card:hover .icon {
+  color: var(--secondary-brown);
+  transform: scale(1.1);
+}
+
+.stats-card .icon {
+  transition: all 0.3s ease;
+}
+
+.stats-card .value {
+  background: linear-gradient(135deg, var(--dark-brown) 0%, var(--primary-brown) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animation delays for stats cards */
+.stats-card-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.stats-card-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.stats-card-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.chart-container {
+  position: relative;
+  padding: 1rem;
+}
+
+.chart-placeholder {
+  height: 300px;
+}
+
+.empty-state {
+  padding: 3rem;
+  color: var(--coffee);
+}
+
+.table-row {
+  transition: all 0.3s ease;
+}
+
+.table-row:hover {
+  background: linear-gradient(135deg, rgba(245, 245, 220, 0.6) 0%, rgba(247, 231, 206, 0.4) 100%);
+  transform: scale(1.002);
+}
+
+/* Chart Styles */
+:host ::ng-deep .chart-container canvas {
+  border-radius: 12px;
+}
+
+/* Badge Variants for Operations */
+.badge.bg-credit {
+  background: linear-gradient(135deg, var(--success) 0%, #228B22 100%) !important;
+}
+
+.badge.bg-debit {
+  background: linear-gradient(135deg, var(--warning) 0%, #DAA520 100%) !important;
+  color: var(--dark-brown) !important;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem 0;
+  }
+  
   .display-4 {
     font-size: 2rem;
   }
   
-  .display-5 {
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+  
+  .stats-card .icon {
+    font-size: 2.5rem;
+  }
+  
+  .stats-card .value {
+    font-size: 2rem;
+  }
+  
+  .chart-placeholder {
+    height: 250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-card .icon {
+    font-size: 2rem;
+  }
+  
+  .stats-card .value {
     font-size: 1.5rem;
+  }
+  
+  .stats-card .label {
+    font-size: 0.85rem;
+  }
+  
+  .chart-placeholder {
+    height: 200px;
   }
 }

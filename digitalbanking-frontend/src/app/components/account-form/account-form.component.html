@@ -1,87 +1,111 @@
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <h3 class="mb-0">Create New {{ accountTypeLabel }}</h3>
-        </div>
-        <div class="card-body">
-          <div *ngIf="isLoading" class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+<div class="account-form-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-brown rounded-modern fade-in-up">
+          <div class="card-header text-center">
+            <div class="form-icon">
+              <i class="bi bi-credit-card-plus"></i>
             </div>
+            <h2 class="mb-0">Create {{ accountTypeLabel }}</h2>
+            <p class="mb-0 opacity-75">Set up a new banking account</p>
           </div>
-          
-          <div *ngIf="errorMessage" class="alert alert-danger">
-            {{ errorMessage }}
+          <div class="card-body">
+            <form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
+              <div class="mb-4">
+                <label for="customerId" class="form-label">
+                  <i class="bi bi-person me-2"></i>Select Customer
+                </label>
+                <select 
+                  class="form-select modern-select" 
+                  id="customerId" 
+                  formControlName="customerId"
+                  [class.is-invalid]="accountForm.get('customerId')?.errors && accountForm.get('customerId')?.touched"
+                >
+                  <option value="">Choose a customer...</option>
+                  <option *ngFor="let customer of customers" [value]="customer.id">
+                    {{ customer.name }} - {{ customer.email }}
+                  </option>
+                </select>
+                <div class="invalid-feedback" *ngIf="accountForm.get('customerId')?.errors && accountForm.get('customerId')?.touched">
+                  Please select a customer
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="initialBalance" class="form-label">
+                  <i class="bi bi-currency-dollar me-2"></i>Initial Balance
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input 
+                    type="number" 
+                    class="form-control modern-input" 
+                    id="initialBalance" 
+                    formControlName="initialBalance"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    [class.is-invalid]="accountForm.get('initialBalance')?.errors && accountForm.get('initialBalance')?.touched"
+                  >
+                </div>
+                <div class="invalid-feedback" *ngIf="accountForm.get('initialBalance')?.errors && accountForm.get('initialBalance')?.touched">
+                  Initial balance must be 0 or greater
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="specificValue" class="form-label">
+                  <i class="bi bi-gear me-2"></i>{{ specificValueLabel }}
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text" *ngIf="accountType === 'current'">$</span>
+                  <span class="input-group-text" *ngIf="accountType === 'saving'">%</span>
+                  <input 
+                    type="number" 
+                    class="form-control modern-input" 
+                    id="specificValue" 
+                    formControlName="specificValue"
+                    [placeholder]="specificValuePlaceholder"
+                    step="0.01"
+                    min="0"
+                    [class.is-invalid]="accountForm.get('specificValue')?.errors && accountForm.get('specificValue')?.touched"
+                  >
+                </div>
+                <div class="invalid-feedback" *ngIf="accountForm.get('specificValue')?.errors && accountForm.get('specificValue')?.touched">
+                  {{ specificValueLabel }} must be 0 or greater
+                </div>
+              </div>
+
+              <div class="alert alert-danger modern-alert" *ngIf="errorMessage">
+                <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+              </div>
+
+              <div class="alert alert-success modern-alert" *ngIf="successMessage">
+                <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
+              </div>
+
+              <div class="d-grid gap-2">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary btn-lg modern-btn"
+                  [disabled]="isLoading || accountForm.invalid"
+                >
+                  <span *ngIf="!isLoading">
+                    <i class="bi bi-plus-circle me-2"></i>Create Account
+                  </span>
+                  <span *ngIf="isLoading">
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Creating Account...
+                  </span>
+                </button>
+                
+                <a routerLink="/accounts" class="btn btn-outline-primary">
+                  <i class="bi bi-arrow-left me-2"></i>Back to Accounts
+                </a>
+              </div>
+            </form>
           </div>
-          
-          <div *ngIf="successMessage" class="alert alert-success">
-            {{ successMessage }}
-          </div>
-          
-          <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
-            <div class="mb-3">
-              <label for="customerId" class="form-label">Customer</label>
-              <select 
-                class="form-select" 
-                id="customerId" 
-                formControlName="customerId"
-                [ngClass]="{'is-invalid': accountForm.controls['customerId'].invalid && accountForm.controls['customerId'].touched}"
-              >
-                <option value="">Select a customer</option>
-                <option *ngFor="let customer of customers" [value]="customer.id">
-                  {{ customer.name }} ({{ customer.email }})
-                </option>
-              </select>
-              <div *ngIf="accountForm.controls['customerId'].invalid && accountForm.controls['customerId'].touched" class="invalid-feedback">
-                Customer is required
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="initialBalance" class="form-label">Initial Balance</label>
-              <input 
-                type="number" 
-                class="form-control" 
-                id="initialBalance" 
-                formControlName="initialBalance"
-                [ngClass]="{'is-invalid': accountForm.controls['initialBalance'].invalid && accountForm.controls['initialBalance'].touched}"
-                min="0"
-                step="0.01"
-              >
-              <div *ngIf="accountForm.controls['initialBalance'].invalid && accountForm.controls['initialBalance'].touched" class="invalid-feedback">
-                <div *ngIf="accountForm.controls['initialBalance'].errors?.['required']">Initial balance is required</div>
-                <div *ngIf="accountForm.controls['initialBalance'].errors?.['min']">Initial balance cannot be negative</div>
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="specificValue" class="form-label">{{ specificValueLabel }}</label>
-              <input 
-                type="number" 
-                class="form-control" 
-                id="specificValue" 
-                formControlName="specificValue"
-                [ngClass]="{'is-invalid': accountForm.controls['specificValue'].invalid && accountForm.controls['specificValue'].touched}"
-                min="0"
-                step="0.01"
-                [placeholder]="specificValuePlaceholder"
-              >
-              <div *ngIf="accountForm.controls['specificValue'].invalid && accountForm.controls['specificValue'].touched" class="invalid-feedback">
-                <div *ngIf="accountForm.controls['specificValue'].errors?.['required']">{{ specificValueLabel }} is required</div>
-                <div *ngIf="accountForm.controls['specificValue'].errors?.['min']">{{ specificValueLabel }} cannot be negative</div>
-              </div>
-            </div>
-            
-            <div class="d-flex justify-content-between">
-              <a routerLink="/accounts" class="btn btn-secondary">Cancel</a>
-              <button type="submit" class="btn btn-primary" [disabled]="accountForm.invalid || isLoading">
-                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Create Account
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>
