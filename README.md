@@ -306,46 +306,62 @@ Cette section présente les différentes interfaces et fonctionnalités de l'app
 ### Interface utilisateur
 
 #### Page de connexion
-![Page de connexion](../../assets/images/login-screenshot.png)
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-34-19.png>)
+
 *Description: Interface de connexion avec validation des champs*
 
 #### Page d'inscription
-![Page d'inscription](../../assets/images/register-screenshot.png)
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-34-37.png>)
 *Description: Formulaire d'inscription pour les nouveaux utilisateurs*
 
-#### Barre de navigation
-![Barre de navigation](../../assets/images/navbar-screenshot.png)
-*Description: Barre de navigation responsive avec éléments conditionnels selon le rôle de l'utilisateur*
+#### dashboard pour les deux roles
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-35-03.png>)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-32-13.png>)
 
 ### Fonctionnalités
 
 #### Liste des clients
-![Liste des clients](../../assets/images/customers-list-screenshot.png)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-35-42.png>)
+
 *Description: Interface de gestion des clients avec recherche et actions CRUD*
 #### Détail d'un client
-![Détail d'un client](../../assets/images/customer-details-screenshot.png)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 22-20-31.png>)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 22-20-39.png>)
+
+
 *Description: Informations détaillées d'un client avec ses comptes associés*
 
 #### Liste des comptes
-![Liste des comptes](../../assets/images/accounts-list-screenshot.png)
-![Liste des comptes](../../assets/images/accounts-list-screenshot2.png)
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-35-23.png>)
 
 *Description: Liste de tous les comptes bancaires avec fonctionnalité de recherche*
 
 #### Détail d'un compte
-![Détail d'un compte](../../assets/images/account-details-screenshot.png)
-![Détail d'un compte](../../assets/images/account-details-screenshot2.png)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-37-53.png>)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-38-01.png>)
+
+![alt text](<assets/images/Capture d’écran du 2025-05-31 22-18-59.png>)
+
 
 *Description: Informations détaillées d'un compte avec historique des opérations*
 
 #### Opérations bancaires
-![Formulaire de transfert](../../assets/images/transfer-operation-screenshot.png)
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-33-21.png>)
+
 *Description: Interface de transfert d'argent entre comptes*
 
 ### Tableaux de bord
 
 #### Dashboard administrateur
-![Dashboard administrateur](../../assets/images/admin-dashboard-screenshot.png)
+![alt text](<assets/images/Capture d’écran du 2025-05-31 21-35-03.png>)
+
 *Description: Tableau de bord avec statistiques et graphiques pour les administrateurs*
 
 
@@ -355,11 +371,11 @@ Cette section présente les différentes interfaces et fonctionnalités de l'app
 
 Le diagramme de classes du backend illustre les relations entre les entités principales du système:
 
-![Diagramme de classes](../../assets/images/class-diagram.png)
-![Diagramme de classes](../../assets/images/class-diagram2.png)
-![Diagramme de classes](../../assets/images/class-diagram3.png)
-![Diagramme de classes](../../assets/images/class-diagram4.png)
-![Diagramme de classes](../../assets/images/class-diagram5.png)
+![alt text](assets/images/class-diagram.png)
+![Diagramme de classes](assets/images/class-diagram2.png)
+![Diagramme de classes](assets/images/class-diagram3.png)
+![Diagramme de classes](assets/images/class-diagram4.png)
+![Diagramme de classes](assets/images/class-diagram5.png)
 
 *Description: Diagramme UML des principales classes du système*
 
@@ -367,7 +383,7 @@ Le diagramme de classes du backend illustre les relations entre les entités pri
 
 Le diagramme de séquence illustre le flux d'authentification et d'opération bancaire:
 
-![Diagramme de séquence](../../assets/images/sequence-diagram.png)
+![Diagramme de séquence](assets/images/sequence-diagram.png)
 *Description: Flux d'authentification et d'opération bancaire*
 
 ## Améliorations futures
